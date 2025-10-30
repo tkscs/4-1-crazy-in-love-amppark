@@ -1,0 +1,75 @@
+---
+title: "4.1 Crazy In Love - Simple Random Sample"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(googlesheets4)
+library(janitor)
+library(ggthemes)
+```
+# Step 1: Load the lyrics from Google Sheets
+
+```{r}
+url = "https://docs.google.com/spreadsheets/d/1SzPw8kjo4KYtkupJBl8pP38slb3_aqLEQ104GUQbaFc"
+lyrics = read_sheet(url, sheet = "Crazy In Love Lyrics") |> 
+  clean_names()
+lyrics
+```
+
+# Step 2: Calculate the lengths for each word
+
+```{r}
+lyrics =
+  lyrics |> 
+  mutate(word_length = str_length(word))
+lyrics
+```
+
+# Step 3: Randomly sample 5 words and calculate the average word length
+
+
+```{r}
+sample_size = 5
+simple_random_sample = sample_n(lyrics, sample_size, replace = FALSE)
+simple_random_sample |> pull(word_length) |> mean()
+```
+
+# Step 4: Do that random sampling process lots and lots of times
+
+```{r}
+number_of_experiments = 100
+
+run_experiment = function(i) {
+  # this is the same code from above, but we've put it into a "function" so we
+  # can repeat the process easily
+  sample_size = 5
+  simple_random_sample = sample_n(lyrics, sample_size, replace = FALSE)
+  simple_random_sample |> pull(word_length) |> mean()
+}
+
+lots_of_average_word_lengths = map_dbl(1:number_of_experiments, run_experiment)
+lots_of_average_word_lengths
+```
+
+# Step 5: Make a histogram of the experiments
+
+You can use base R to make a histogram:
+
+```{r}
+lots_of_average_word_lengths |> 
+  hist()
+```
+
+Or you can use ggplot:
+
+```{r}
+ggplot(NULL, aes(x = lots_of_average_word_lengths)) +
+  geom_histogram(binwidth = 0.1) +
+  theme_few()
+```
+
+
+
+
